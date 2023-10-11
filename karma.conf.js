@@ -63,7 +63,7 @@ module.exports = function(karma) {
             use: [ 'source-map-loader' ]
           },
           {
-            test: /\.(bpmn|css)$/,
+            test: /\.(bpmn|css|svg)$/,
             use: 'raw-loader'
           }
         ]

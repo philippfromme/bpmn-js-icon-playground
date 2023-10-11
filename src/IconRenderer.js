@@ -3,7 +3,6 @@ import inherits from 'inherits-browser';
 import BaseRenderer from 'diagram-js/lib/draw/BaseRenderer';
 
 import {
-  getBusinessObject,
   is,
   isAny
 } from 'bpmn-js/lib/util/ModelUtil';
@@ -19,28 +18,24 @@ import {
   create as svgCreate
 } from 'tiny-svg';
 
-import {
-  getModelerTemplateIcon
-} from './util';
-
 var HIGH_PRIORITY = 1250;
 
 
-export default function ElementTemplateIconRenderer(
+export default function IconRenderer(
     config,
     bpmnRenderer,
     eventBus) {
 
   this._bpmnRenderer = bpmnRenderer;
 
-  this._iconProperty = config && config.iconProperty;
+  this._icons = config ? config.icons : {};
 
   BaseRenderer.call(this, eventBus, HIGH_PRIORITY);
 }
 
-inherits(ElementTemplateIconRenderer, BaseRenderer);
+inherits(IconRenderer, BaseRenderer);
 
-ElementTemplateIconRenderer.prototype.canRender = function(element) {
+IconRenderer.prototype.canRender = function(element) {
 
   if (isLabel(element)) {
     return false;
@@ -51,11 +46,24 @@ ElementTemplateIconRenderer.prototype.canRender = function(element) {
   );
 };
 
-ElementTemplateIconRenderer.prototype._getIcon = function(element) {
-  return getModelerTemplateIcon(element, this._iconProperty);
+IconRenderer.prototype._getIcon = function(element) {
+  if (is(element, 'bpmn:Event')) {
+    const icons = this._icons[element.type];
+
+    const { businessObject } = element,
+          eventDefinition = businessObject.eventDefinitions && businessObject.eventDefinitions[0];
+
+    if (eventDefinition) {
+      return icons[eventDefinition.$type];
+    } else {
+      return;
+    }
+  }
+
+  return this._icons[element.type];
 };
 
-ElementTemplateIconRenderer.prototype.drawShape = function(parentGfx, element) {
+IconRenderer.prototype.drawShape = function(parentGfx, element) {
 
   var renderer = this._bpmnRenderer.handlers[
     [
@@ -72,6 +80,8 @@ ElementTemplateIconRenderer.prototype.drawShape = function(parentGfx, element) {
 
   var icon = this._getIcon(element);
 
+  console.log('icon', icon);
+
   var size = 18;
 
   var padding = is(element, 'bpmn:Task') ? {
@@ -84,7 +94,7 @@ ElementTemplateIconRenderer.prototype.drawShape = function(parentGfx, element) {
 
   var img = svgCreate('image');
   svgAttr(img, {
-    href: icon,
+    href:  'data:image/svg+xml;utf8,' + icon,
     width: size,
     height: size,
     ...padding
@@ -95,17 +105,8 @@ ElementTemplateIconRenderer.prototype.drawShape = function(parentGfx, element) {
   return gfx;
 };
 
-ElementTemplateIconRenderer.$inject = [
-  'config.elementTemplateIconRenderer',
+IconRenderer.$inject = [
+  'config.iconRenderer',
   'bpmnRenderer',
   'eventBus'
 ];
-
-
-// helpers //////////////
-
-export function hasEventDefinition(element, eventType) {
-  const businessObject = getBusinessObject(element);
-
-  return (businessObject.eventDefinitions || []).length;
-}

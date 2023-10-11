@@ -1,7 +1,7 @@
 {
-  "name": "@bpmn-io/element-template-icon-renderer",
-  "version": "0.5.1",
-  "description": "A bpmn-js extension to render element templates icons",
+  "name": "bpmn-js-icon-playground",
+  "version": "0.1.0",
+  "description": "A bpmn-js playground for custom element icons",
   "main": "src/index.js",
   "publishConfig": {
     "access": "public"
@@ -61,8 +61,7 @@
     "sinon": "^9.2.4",
     "sinon-chai": "^3.7.0",
     "source-map-loader": "^4.0.0",
-    "webpack": "^5.74.0",
-    "zeebe-bpmn-moddle": "^0.19.0"
+    "webpack": "^5.74.0"
   },
   "dependencies": {
     "inherits-browser": "^0.1.0",
